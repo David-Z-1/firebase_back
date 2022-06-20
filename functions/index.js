@@ -28,10 +28,11 @@ rover_app.get('/', async (req,res)=>{
     .once("value")
     .then((snapshot) => {
         var data = snapshot.val();  //Data is in JSON format.
+        console.log(data); 
         new_data=JSON.stringify(data[data.length-1]);
         const obj = JSON.parse(new_data);
         console.log(obj); 
-        res.send([obj['x-axis'],obj['y-axis']]);
+        res.send([obj['x_value'],obj['y_value']]);
     });
 })
 
