@@ -10,8 +10,11 @@ const alien_app = express();
 alien_app.use(cors());
 const new_alien_app = express();
 new_alien_app.use(cors());
+const mannual_app = express();
+mannual_app.use(cors());
 
 var serviceAccount = require('./admin.json');
+const { ref } = require("firebase-functions/v1/database");
 admin.initializeApp({
 credential: admin.credential.cert(serviceAccount),
 databaseURL: "https://rover-back-end-default-rtdb.europe-west1.firebasedatabase.app",
@@ -21,6 +24,7 @@ authDomain: "rover-back-end.firebaseapp.com",
 var db = admin.database();
 const ref_rover = db.ref("/rover_loc");
 const ref_alien = db.ref("/alien_loc");
+const ref_mannual = db.ref("/mannual_instruction");
 
 rover_app.get('/', async (req,res)=>{
     console.log('rover site')
@@ -28,7 +32,7 @@ rover_app.get('/', async (req,res)=>{
     .once("value")
     .then((snapshot) => {
         var data = snapshot.val();  //Data is in JSON format.
-        console.log(data); 
+        console.log(data);
         new_data=JSON.stringify(data[data.length-1]);
         const obj = JSON.parse(new_data);
         console.log(obj); 
@@ -55,7 +59,6 @@ alien_app.get('/', async (req,res)=>{
 })
 
 new_alien_app.get('/', async (req,res)=>{
-    console.log('alien site')
     ref_alien
     .once("value")
     .then((snapshot) => {
@@ -68,10 +71,17 @@ new_alien_app.get('/', async (req,res)=>{
     });
 })
 
+mannual_app.post('/', async function(req, res){
+    console.log('mannual site')
+    console.log("data_transmitted", req.body)
+    direction=JSON.stringify(req.body);
+    ref_mannual.push(direction)
+    });
 
 exports.rover_1 = functions.https.onRequest(rover_app);
 exports.alien_1 = functions.https.onRequest(alien_app);
 exports.new_alien_app = functions.https.onRequest(new_alien_app);
+exports.mannual_app = functions.https.onRequest(mannual_app);
 
 
 
