@@ -12,6 +12,8 @@ const new_alien_app = express();
 new_alien_app.use(cors());
 const mannual_app = express();
 mannual_app.use(cors());
+const mode_app = express();
+mode_app.use(cors());
 
 var serviceAccount = require('./admin.json');
 const { ref } = require("firebase-functions/v1/database");
@@ -25,6 +27,7 @@ var db = admin.database();
 const ref_rover = db.ref("/rover_loc");
 const ref_alien = db.ref("/alien_loc");
 const ref_mannual = db.ref("/mannual_instruction");
+const ref_mode = db.ref("/mode");
 
 rover_app.get('/', async (req,res)=>{
     console.log('rover site')
@@ -76,12 +79,21 @@ mannual_app.post('/', async function(req, res){
     console.log("data_transmitted", req.body)
     direction=JSON.stringify(req.body);
     ref_mannual.push(direction)
-    });
+});
+
+mode_app.post('/', async function(req, res){
+    console.log('switch mode')
+    console.log("data_transmitted", req.body)
+    mode=JSON.stringify(req.body);
+    ref_mannual.push(mode)
+});
 
 exports.rover_1 = functions.https.onRequest(rover_app);
 exports.alien_1 = functions.https.onRequest(alien_app);
 exports.new_alien_app = functions.https.onRequest(new_alien_app);
 exports.mannual_app = functions.https.onRequest(mannual_app);
+exports.mode_app = functions.https.onRequest(mode_app);
+
 
 
 
