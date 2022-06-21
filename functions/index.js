@@ -6,6 +6,8 @@ const admin = require("firebase-admin")
 
 const rover_app = express();
 rover_app.use(cors());
+const radar_app = express();
+radar_app.use(cors());
 const alien_app = express();
 alien_app.use(cors());
 const new_alien_app = express();
@@ -28,6 +30,7 @@ const ref_rover = db.ref("/rover_loc");
 const ref_alien = db.ref("/alien_loc");
 const ref_mannual = db.ref("/mannual_instruction");
 const ref_mode = db.ref("/mode");
+const ref_radar = db.ref("/radar")
 
 rover_app.get('/', async (req,res)=>{
     console.log('rover site')
@@ -74,6 +77,18 @@ new_alien_app.get('/', async (req,res)=>{
     });
 })
 
+radar_app.get('/', async (req,res)=>{
+    ref_radar
+    .once("value")
+    .then((snapshot) => {
+        var data_radar = snapshot.val();  //Data is in JSON format.
+        console.log("data_fetched", data_radar)
+        new_data=JSON.stringify(data_radar);
+        const obj = JSON.parse(new_data);
+        res.send(obj);
+    });
+})
+
 mannual_app.post('/', async function(req, res){
     console.log('mannual site')
     console.log("data_transmitted", req.body)
@@ -91,6 +106,7 @@ mode_app.post('/', async function(req, res){
 exports.rover_1 = functions.https.onRequest(rover_app);
 exports.alien_1 = functions.https.onRequest(alien_app);
 exports.new_alien_app = functions.https.onRequest(new_alien_app);
+exports.radar = functions.https.onRequest(radar_app);
 exports.mannual_app = functions.https.onRequest(mannual_app);
 exports.mode_app = functions.https.onRequest(mode_app);
 
