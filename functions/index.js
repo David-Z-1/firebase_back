@@ -1,8 +1,9 @@
 const functions = require("firebase-functions");
 const express = require("express");
 const cors = require("cors");
-const { firebaseConfig } = require("firebase-functions");
+// const { firebaseConfig } = require("firebase-functions");
 const admin = require("firebase-admin")
+// import "firebase/analytics";
 
 const rover_app = express();
 rover_app.use(cors());
@@ -18,6 +19,8 @@ const mode_app = express();
 mode_app.use(cors());
 const status_app = express();
 status_app.use(cors());
+const route_app = express();
+route_app.use(cors())
 
 var serviceAccount = require('./admin.json');
 const { ref } = require("firebase-functions/v1/database");
@@ -26,14 +29,40 @@ credential: admin.credential.cert(serviceAccount),
 databaseURL: "https://rover-back-end-default-rtdb.europe-west1.firebasedatabase.app",
 authDomain: "rover-back-end.firebaseapp.com",
 });
+// const analytics = firebase.analytics();
+
+
+
 
 var db = admin.database();
 const ref_rover = db.ref("/rover_loc");
 const ref_alien = db.ref("/alien_loc");
 const ref_mannual = db.ref("/mannual_instruction");
 const ref_mode = db.ref("/mode");
-const ref_radar = db.ref("/radar")
+const ref_radar = db.ref("/radar_loc")
 const ref_status = db.ref("/Server_Status")
+const ref_route = db.ref("/Route_Planning")
+
+
+
+route_app.get('/', async (req,res)=>{
+    console.log('rover route')
+    ref_route
+    .once("value")
+    .then((snapshot) => {
+        var data = snapshot.val();  //Data is in JSON format.
+        // new_data=JSON.stringify(data[data.length-1]);
+        data_final = new Array;
+        for (let i = 0; i < data.length; i++) {
+          //console.log("json.parse: ",data_alien[i]);
+          const tmp_data = JSON.stringify(data[i]); 
+          const obj = JSON.parse(tmp_data);
+          data_final.push(obj);
+        }
+        res.send(data_final);
+    });
+})
+
 
 status_app.get('/', async (req,res)=>{
     console.log('status')
@@ -127,6 +156,7 @@ exports.radar = functions.https.onRequest(radar_app);
 exports.mannual_app = functions.https.onRequest(mannual_app);
 exports.mode_app = functions.https.onRequest(mode_app);
 exports.status_app = functions.https.onRequest(status_app);
+exports.route = functions.https.onRequest(route_app);
 
 
 
